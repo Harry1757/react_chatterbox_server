@@ -7,6 +7,7 @@ reuqestHandler 함수는 이미 basic-server.js 파일에서 사용 했지만, �
 requestHandler 함수를 export 하여 basic-server.js 에서 사용 할 수 있게 하세요
 
 **************************************************************/
+let messages = {results:[]}
 
 const requestHandler = function (request, response) {
   // node server 의 requestHandler는 항상 request, response를 인자로 받습니다.
@@ -27,13 +28,38 @@ const requestHandler = function (request, response) {
   const headers = defaultCorsHeaders;
   // 응답 헤더에 응답하는 컨텐츠의 자료 타입을 헤더에 기록 합니다.
   headers["Content-Type"] = "text/plain";
-
   // .writeHead() 메소드의 두번째 인자로는 응답 헤더와 키와 값을 객체 형태로 적어줍니다.
-  response.writeHead(200, headers);
+  if(request.method === "OPTIONS"){
+    // .writeHead() 메소드의 두번째 인자로는 응답 헤더와 키와 값을 객체 형태로 적어줍니다.
+    response.writeHead(200, headers);
+     // 노드 서버에 대한 모든 요청은 응답이 있어야 합니다. response.end 메소드는 요청에 대한 응답을 보내줍니다.
+    response.end();
+  }
+  let body = [];
+  if (request.method === "POST" && request.url === "/messages") {
+    request.on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', () => {
+      body = Buffer.concat(body).toString();
+      messages.results.push(JSON.parse(body));
+      response.writeHead(201,headers);
+      response.end(JSON.stringify(messages));
+    })
+  }
+  else if(request.method === "GET" && request.url === "/messages"){
+    response.writeHead(200,headers);
+    response.end(JSON.stringify(messages));
+  }
+  else{
+      response.writeHead(404, headers);
+      response.end();
+
+
+
 
   // 노드 서버에 대한 모든 요청은 응답이 있어야 합니다. response.end 메소드는 요청에 대한 응답을 보내줍니다.
-  response.end("Hello, World!");
 };
+}
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
@@ -50,3 +76,5 @@ const defaultCorsHeaders = {
   "access-control-allow-headers": "content-type, accept",
   "access-control-max-age": 10 // Seconds.
 };
+
+module.exports = requestHandler

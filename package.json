@@ -8,7 +8,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "start": "node server/basic-server.js",
+    "start": "nodemon server/basic-server.js",
     "test": "jest",
     "submit": "node .travis/submit.js"
   },
@@ -22,5 +22,8 @@
     "hooks": {
       "pre-commit": "eslint ./server"
     }
+  },
+  "dependencies": {
+    "nodemon": "^2.0.6"
   }
 }
